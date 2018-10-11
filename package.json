@@ -9,7 +9,8 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.2",
-    "solidity-coverage": "^0.5.11"
+    "solidity-coverage": "^0.5.11",
+    "truffle": "^4.1.13"
   },
   "scripts": {
     "build": "truffle compile",
