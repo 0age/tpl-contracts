@@ -4,7 +4,7 @@
 ### ***** *TPL-1.0 (CONTRACTS POST-AUDIT)* *****
 Contracts implementing a TPL jurisdiction and an ERC20-enforced TPL.
 
-[![Build Status](https://travis-ci.com/TPL-protocol/tpl-contracts.svg?branch=audit-fix)](https://travis-ci.com/TPL-protocol/tpl-contracts)
+[![Build Status](https://www.travis-ci.org/0age/tpl-contracts.svg?branch=audit-fix)](https://www.travis-ci.org/0age/tpl-contracts)
 
 This branch includes an implementation of a [BasicJurisdiction](https://github.com/TPL-protocol/tpl-contracts/blob/audit/contracts/BasicJurisdiction.sol). It does not support many of the features of the Standard Jurisdiction, mostly around allowing participants and operators to assign attributes using signed validator approvals and enabling required staked funds or fees. Also, note that in order
 for StandardJurisdiction to be able to inherit from the same interface, some
@@ -25,7 +25,7 @@ First, ensure that [truffle](https://truffleframework.com/docs/truffle/getting-s
 Next, install dependencies and compile contracts:
 
 ```sh
-$ git clone -b audit https://github.com/TPL-protocol/tpl-contracts
+$ git clone -b audit-fix https://github.com/0age/tpl-contracts
 $ cd tpl-contracts
 $ yarn install
 $ truffle compile
