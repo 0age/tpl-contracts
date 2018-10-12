@@ -15,6 +15,6 @@
   "scripts": {
     "build": "truffle compile",
     "test": "truffle compile; node scripts/testBasic.js; node scripts/testZEPValidator.js; node scripts/testOptimizationDisabled.js",
-    "coverage": "./node_modules/.bin/solidity-coverage"    
+    "coverage": "./node_modules/.bin/solidity-coverage"
   }
 }

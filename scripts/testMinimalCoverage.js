@@ -4,10 +4,8 @@ const JurisdictionContractData = require('../build/contracts/BasicJurisdiction.j
 const TPLTokenContractData = require('../build/contracts/TPLTokenInstance.json')
 
 // insert default coverage provider
-if (typeof web3 === 'undefined') {
-  var Web3 = require('web3')
-  web3 = new Web3('ws://localhost:8555')
-}
+var Web3 = require('web3')
+web3 = new Web3('ws://localhost:8555')
 
 async function test() {
   // NOTE: still needs additional tests written to cover fees and related events
@@ -50,20 +48,18 @@ async function test() {
   const latestBlock = await web3.eth.getBlock('latest')
   const gasLimit = latestBlock.gasLimit
 
-  /* // skip the jurisdiction for now //
   const Jurisdiction = await JurisdictionDeployer.deploy(
     {
       data: JurisdictionContractData.bytecode
     }
   ).send({
     from: address,
-    gas: 5000000,
-    gasPrice: 10 ** 9
+    gas: gasLimit - 1,
+    gasPrice: 10 ** 1
   }).catch(error => {
     console.error(error)
     process.exit()
   })
-  */
 
   deployGas = await web3.eth.estimateGas({
       from: address,
@@ -95,8 +91,8 @@ async function test() {
   passed++
 
 
-  /*
-  // ***************************** skip testing ***************************** //
+
+  // **************************** begin testing ***************************** //
 
 
   console.log(' ✓ jurisdiction contract deploys successfully')
@@ -154,7 +150,9 @@ async function test() {
     )
     passed++
   })
-  
+ 
+  /* skip remaining tests for now
+
   await TPLToken.methods.balanceOf(address).call({
     from: address,
     gas: 5000000,
