@@ -90,7 +90,7 @@ async function test() {
   ).send({
     from: address,
     gas: gasLimit - 1,
-    gasPrice: 10 ** 9
+    gasPrice: 10 ** 1
   }).catch(error => {
     console.error(error)
     process.exit(1)
