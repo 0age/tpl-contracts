@@ -425,6 +425,48 @@ async function test() {
     passed++
   })
 
+  await ZEPValidatorContractInstance.methods.pauseIssuance(
+  ).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  })
+  console.log(` ✓  - ZEP validator attribute issuance can be paused`)
+  passed++
+
+  await ZEPValidatorContractInstance.methods.issuancePaused(
+  ).call({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(isPaused => {
+    assert.ok(isPaused)
+    console.log(` ✓  - checks for paused issuance return true when paused`)
+    passed++
+  })
+
+  await ZEPValidatorContractInstance.methods.issueAttribute(
+    attributedAddress
+  ).send({
+    from: organizationAddress,
+    gas: 5000000,
+    gasPrice: '1000000000'
+  }).catch(error => {
+    console.log(
+      ` ✓  - organization cannot issue attributes when issuance is paused`
+    )
+    passed++
+  })
+
+  await ZEPValidatorContractInstance.methods.unpauseIssuance(
+  ).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  })
+  console.log(` ✓  - ZEP validator attribute issuance can be unpaused`)
+  passed++
+
   await ZEPValidatorContractInstance.methods.pause(
   ).send({
     from: address,
@@ -442,7 +484,7 @@ async function test() {
     gasPrice: '1000000000'
   }).catch(error => {
     console.log(
-      ` ✓  - organization cannot issue attributes to an address when paused`
+      ` ✓  - organization cannot issue attributes when contract is paused`
     )
     passed++
   })

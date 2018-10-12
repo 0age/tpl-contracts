@@ -555,6 +555,20 @@ async function test() {
     passed++
   })
 
+  await Jurisdiction.methods.getAttributeValidator(
+    attributedAddress,
+    attribute.attributeId
+  ).call({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(attributeValidator => { 
+    assert.strictEqual(attributeValidator[0], validatorAddress)
+    assert.ok(attributeValidator[1])
+    console.log(' ✓ external calls can check for the validator of an attribute')
+    passed++
+  })
+
   await Jurisdiction.methods.addAttributeTo(
     attributedAddress,
     additionalAttribute.attributeId,
@@ -583,6 +597,23 @@ async function test() {
     passed++
   })
 
+  await TPLToken.methods.canTransfer(attributedAddress, 10).call({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(canTransfer => {
+    assert.ok(canTransfer) 
+    console.log(
+      " ✓  - tokens can be checked for transfer between valid addresses"
+    )
+    passed++
+  }).catch(error => {
+    console.log(
+      " ✘  - tokens can be checked for transfer between valid addresses"
+    )
+    failed++
+  })
+
   await TPLToken.methods.transfer(attributedAddress, 10).send({
     from: address,
     gas: 5000000,
@@ -596,6 +627,57 @@ async function test() {
   }).catch(error => {
     console.log(
       " ✘  - tokens can be transferred between addresses with valid attributes"
+    )
+    failed++
+  })
+
+  await TPLToken.methods.approve(address, 10).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(receipt => {
+    assert.ok(receipt.status) 
+    console.log(
+      " ✓  - operator can be approved for transferFrom"
+    )
+    passed++
+  }).catch(error => {
+    console.log(
+      " ✘  - operator can be approved for transferFrom"
+    )
+    failed++
+  })
+
+  await TPLToken.methods.canTransferFrom(address, attributedAddress, 10).call({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(canTransfer => {
+    assert.ok(canTransfer) 
+    console.log(
+      " ✓  - tokens can be checked for transferFrom between valid addresses"
+    )
+    passed++
+  }).catch(error => {
+    console.log(
+      " ✘  - tokens can be checked for transferFrom between valid addresses"
+    )
+    failed++
+  })
+
+  await TPLToken.methods.transferFrom(address, attributedAddress, 10).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(receipt => {
+    assert.ok(receipt.status)    
+    console.log(
+      " ✓  - tokens can transferFrom between addresses with valid attributes"
+    )
+    passed++
+  }).catch(error => {
+    console.log(
+      " ✘  - tokens can transferFrom between addresses with valid attributes"
     )
     failed++
   })
