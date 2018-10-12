@@ -150,8 +150,6 @@ async function test() {
     )
     passed++
   })
- 
-  /* skip remaining tests for now
 
   await TPLToken.methods.balanceOf(address).call({
     from: address,
@@ -1707,7 +1705,6 @@ async function test() {
 
   // TODO: handle all failed test cases - a bunch will halt testing if they fail
 
-  */
   console.log(
     `completed ${passed + failed} test${passed + failed === 1 ? '' : 's'} ` + 
     `with ${failed} failure${failed === 1 ? '' : 's'}.`
