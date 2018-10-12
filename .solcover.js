@@ -1,5 +1,5 @@
 module.exports = {
-    norpc: true,
+    //norpc: true,
     //port: 8545,
     //testrpcOptions: '--port 8545 --gasLimit 0xfffffffffff --gasPrice 0x01'
     testCommand: 'node ./scripts/testMinimalCoverage.js',

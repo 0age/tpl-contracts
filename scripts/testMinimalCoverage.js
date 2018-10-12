@@ -2,17 +2,11 @@ var assert = require('assert');
 
 const JurisdictionContractData = require('../build/contracts/BasicJurisdiction.json')
 const TPLTokenContractData = require('../build/contracts/TPLTokenInstance.json')
-const applicationConfig = require('../config.js')
-const connectionConfig = require('../truffle.js')
 
-const connection = connectionConfig.networks[applicationConfig.network]
-
-let web3 = connection.provider
-
-// insert default provider if config is missing
+// insert default coverage provider
 if (typeof web3 === 'undefined') {
   var Web3 = require('web3')
-  web3 = new Web3('ws://localhost:8545')
+  web3 = new Web3('ws://localhost:8555')
 }
 
 async function test() {
