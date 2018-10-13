@@ -1,18 +1,9 @@
-var assert = require('assert');
+var assert = require('assert')
 
 const JurisdictionContractData = require('../build/contracts/BasicJurisdiction.json')
 const ZEPValidatorContractData = require('../build/contracts/ZEPValidator.json')
 const MockZEPTokenContractData = require('../build/contracts/TPLTokenInstance.json')
 const applicationConfig = require('../config.js')
-const connectionConfig = require('../truffle.js')
-
-const connection = connectionConfig.networks[applicationConfig.network]
-
-let web3 = connection.provider
-
-const Jurisdiction = new web3.eth.Contract(JurisdictionContractData.abi)
-const ZEPValidator = new web3.eth.Contract(ZEPValidatorContractData.abi)
-const MockZEPToken = new web3.eth.Contract(MockZEPTokenContractData.abi)
 
 const mockZEPTokenAttributeID = applicationConfig.ZEPValidatorAttributeID
 const ZEPValidatorDescription = applicationConfig.ZEPValidatorDescription
@@ -33,11 +24,11 @@ const mockZEPTokenAttributeDescription = applicationConfig[
 
 const ZEPOrganizationName = 'Mock ZEP Organization'
 
-async function test() {
-  console.log('running tests...')
+module.exports = {test: async function (provider, testingContext) {
+  var web3 = provider
   let passed = 0
   let failed = 0
-  
+  console.log('running tests...')
   // get available addresses and assign them to various roles
   const addresses = await Promise.resolve(web3.eth.getAccounts())
   if (addresses.length < 4) {
@@ -51,12 +42,27 @@ async function test() {
   const inattributedAddress = addresses[3]
   const nullAddress = '0x0000000000000000000000000000000000000000'
 
-  const JurisdictionContractInstance = await Jurisdiction.deploy({
-    data: JurisdictionContractData.bytecode
-  }).send({
+  const Jurisdiction = new web3.eth.Contract(JurisdictionContractData.abi)
+  const ZEPValidator = new web3.eth.Contract(ZEPValidatorContractData.abi)
+  const MockZEPToken = new web3.eth.Contract(MockZEPTokenContractData.abi)
+
+// *************************** deploy contracts *************************** //
+  let deployGas;
+
+  const latestBlock = await web3.eth.getBlock('latest')
+  const gasLimit = latestBlock.gasLimit
+
+  const JurisdictionContractInstance = await Jurisdiction.deploy(
+    {
+      data: JurisdictionContractData.bytecode
+    }
+  ).send({
     from: address,
-    gas: 6000000,
-    gasPrice: '1000000000'
+    gas: gasLimit - 1,
+    gasPrice: 10 ** 1
+  }).catch(error => {
+    console.error(error)
+    process.exit(1)
   })
 
   const jurisdictionAddress = JurisdictionContractInstance.options.address 
@@ -65,8 +71,8 @@ async function test() {
     data: ZEPValidatorContractData.bytecode
   }).send({
     from: address,
-    gas: 5000000,
-    gasPrice: '1000000000'
+    gas: gasLimit - 1,
+    gasPrice: 10 ** 1
   })
 
   const ZEPValidatorAddress = ZEPValidatorContractInstance.options.address
@@ -75,8 +81,8 @@ async function test() {
     data: MockZEPTokenContractData.bytecode
   }).send({
     from: address,
-    gas: 5000000,
-    gasPrice: '1000000000'
+    gas: gasLimit - 1,
+    gasPrice: 10 ** 1
   })
 
   const tokenAddress = MockZEPTokenContractInstance.options.address
@@ -412,6 +418,20 @@ async function test() {
   })
 
   await ZEPValidatorContractInstance.methods.setMaximumAddresses(
+    inattributedAddress,
+    2
+  ).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: '1000000000'
+  }).catch(error => {
+    console.log(
+      ` ✓ ZEP validator cannot change maximum address for unknown organization`
+    )
+    passed++
+  })
+
+  await ZEPValidatorContractInstance.methods.setMaximumAddresses(
     organizationAddress,
     100
   ).send({
@@ -505,6 +525,7 @@ async function test() {
     gas: 5000000,
     gasPrice: '1000000000'
   }).then(receipt => {
+    assert.ok(receipt.status)
     console.log(
       ` ✓ organization can issue attributes to an address`
     )
@@ -514,6 +535,19 @@ async function test() {
     assert.strictEqual(logs.organization, organizationAddress)
     assert.strictEqual(logs.attributedAddress, attributedAddress)
     console.log(' ✓  - AttributeIssued event is logged correctly')
+    passed++
+  })
+
+  await ZEPValidatorContractInstance.methods.issueAttribute(
+    attributedAddress
+  ).send({
+    from: organizationAddress,
+    gas: 5000000,
+    gasPrice: '1000000000'
+  }).catch(error => {
+    console.log(
+      ` ✓ jurisditction will reject duplicate attributes on the same address`
+    )
     passed++
   })
 
@@ -636,10 +670,24 @@ async function test() {
   await ZEPValidatorContractInstance.methods.revokeAttribute(
     attributedAddress
   ).send({
+    from: inattributedAddress,
+    gas: 5000000,
+    gasPrice: '1000000000'
+  }).catch(error => {
+    console.log(
+      ` ✓ non-organization cannot revoke attributes from an address`
+    )
+    passed++
+  })
+
+  await ZEPValidatorContractInstance.methods.revokeAttribute(
+    attributedAddress
+  ).send({
     from: organizationAddress,
     gas: 5000000,
     gasPrice: '1000000000'
   }).then(receipt => {
+    assert.ok(receipt.status)
     console.log(
       ` ✓ organization can revoke attributes from an address`
     )
@@ -652,11 +700,40 @@ async function test() {
     passed++
   })
 
+  await ZEPValidatorContractInstance.methods.revokeAttribute(
+    nullAddress
+  ).send({
+    from: organizationAddress,
+    gas: 5000000,
+    gasPrice: '1000000000'
+  }).catch(error => {
+    console.log(
+      ` ✓ organization cannot revoke attributes from zero address`
+    )
+    passed++
+  })
+
+  await ZEPValidatorContractInstance.methods.revokeAttribute(
+    inattributedAddress
+  ).send({
+    from: organizationAddress,
+    gas: 5000000,
+    gasPrice: '1000000000'
+  }).catch(error => {
+    console.log(
+      ` ✓ organization cannot revoke unissued attributes from an address`
+    )
+    passed++
+  })
+
   console.log(
     `completed ${passed + failed} tests with ${failed} ` +
     `failure${failed === 1 ? '' : 's'}.`
   )
-  process.exit()
-}
+  if (failed > 0) {
+    process.exit(1)
+  }
 
-test()
+  process.exit(0)
+
+}}
