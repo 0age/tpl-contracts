@@ -155,6 +155,23 @@ module.exports = {test: async function (provider, testingContext) {
     passed++
   })
 
+  await TPLToken.methods.approve(address, 10).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).then(receipt => {
+    assert.ok(receipt.status) 
+    console.log(
+      " ✓  - operator can be approved for transferFrom"
+    )
+    passed++
+  }).catch(error => {
+    console.log(
+      " ✘  - operator can be approved for transferFrom"
+    )
+    failed++
+  })
+
   await TPLToken.methods.transfer(inattributedAddress, 10).send({
     from: address,
     gas: 5000000,
@@ -162,6 +179,17 @@ module.exports = {test: async function (provider, testingContext) {
   }).catch(error => {
     console.log(
       " ✓  - tokens can't be transferred before valid attributes are assigned"
+    )
+    passed++
+  })
+
+  await TPLToken.methods.transferFrom(address, inattributedAddress, 10).send({
+    from: address,
+    gas: 5000000,
+    gasPrice: 10 ** 9
+  }).catch(error => {
+    console.log(
+      " ✓  - tokens can't transferFrom before valid attributes are assigned"
     )
     passed++
   })
@@ -657,23 +685,6 @@ module.exports = {test: async function (provider, testingContext) {
   }).catch(error => {
     console.log(
       " ✘  - tokens can be transferred between addresses with valid attributes"
-    )
-    failed++
-  })
-
-  await TPLToken.methods.approve(address, 10).send({
-    from: address,
-    gas: 5000000,
-    gasPrice: 10 ** 9
-  }).then(receipt => {
-    assert.ok(receipt.status) 
-    console.log(
-      " ✓  - operator can be approved for transferFrom"
-    )
-    passed++
-  }).catch(error => {
-    console.log(
-      " ✘  - operator can be approved for transferFrom"
     )
     failed++
   })
